@@ -1,0 +1,30 @@
+name: ars_cognitio
+description: No more puffed up subscriptions. Connect your cloud keys directly to your phone and move on!
+publish_to: 'none'
+version: 1.0.0+1
+environment:
+  sdk: '>=2.19.5 <3.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  googleapis: ^10.1.0
+  dart_openai: ^1.9.1
+  macos_ui: ^1.12.2
+  fluent_ui: ^4.4.2
+  fluentui_system_icons: ^1.1.198
+  universal_io: ^2.2.0
+  fast_log: ^1.0.2
+  precision_stopwatch: ^1.0.2
+  hive_flutter: ^1.1.0
+  googleapis_auth: ^1.4.0
+  http: ^0.13.5
+  lzstring: ^2.0.0+2
+  hive: ^2.2.3
+  synchronized: ^3.0.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+flutter:
+  uses-material-design: true
