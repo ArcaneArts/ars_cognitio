@@ -34,6 +34,7 @@ dependencies:
   tinycolor2: ^3.0.1
   dialoger: ^1.0.0
   padded: ^1.0.1
+  snackbar: ^1.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

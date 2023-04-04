@@ -17,6 +17,12 @@ part 'data.g.dart';
 class Data {
   List<Chat>? chats;
   Settings? settings;
+  List<String>? generated;
+
+  List<String> getGenerated() {
+    generated ??= [];
+    return generated!;
+  }
 
   List<Chat> getChats() {
     chats ??= [];

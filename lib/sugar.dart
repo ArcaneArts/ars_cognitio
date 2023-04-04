@@ -4,6 +4,7 @@ import 'package:ars_cognitio/services/chat_service.dart';
 import 'package:ars_cognitio/services/data_service.dart';
 import 'package:ars_cognitio/services/gcp_service.dart';
 import 'package:ars_cognitio/services/openai_service.dart';
+import 'package:ars_cognitio/services/stable_diffusion_service.dart';
 import 'package:fast_log/fast_log.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:precision_stopwatch/precision_stopwatch.dart';
@@ -53,6 +54,8 @@ AIService aiService() => services().get();
 GoogleCloudService gcpService() => services().get();
 
 OpenAIService openaiService() => services().get();
+
+StableDiffusionService stableDiffusionService() => services().get();
 
 DataService dataService() => services().get();
 

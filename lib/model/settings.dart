@@ -16,6 +16,7 @@ class Settings {
   String? openAiKey;
   String? openAiOrganization;
   String? googleServiceAccountJson;
+  String? stableDiffusionApiKey;
 
   Settings();
 
