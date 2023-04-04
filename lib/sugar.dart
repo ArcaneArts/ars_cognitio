@@ -1,5 +1,7 @@
+import 'package:ars_cognitio/model/data.dart';
 import 'package:ars_cognitio/services/ai_service.dart';
-import 'package:ars_cognitio/services/credential_service.dart';
+import 'package:ars_cognitio/services/chat_service.dart';
+import 'package:ars_cognitio/services/data_service.dart';
 import 'package:ars_cognitio/services/gcp_service.dart';
 import 'package:ars_cognitio/services/openai_service.dart';
 import 'package:fast_log/fast_log.dart';
@@ -11,6 +13,14 @@ import 'package:synchronized/synchronized.dart';
 Box hiveNow(String box) => Hive.box("ac$box");
 
 Lock _lock = Lock();
+
+void saveData(Function(Data d) f) {
+  Data data = dataService().data();
+  f(data);
+  dataService().save();
+}
+
+Data data() => dataService().data();
 
 Future<Box> hive(String box) async {
   if (Hive.isBoxOpen("ac$box")) {
@@ -36,13 +46,15 @@ Future<LazyBox> hiveLazy(String box) => _lock.synchronized(() async {
       });
     });
 
+ChatService chatService() => services().get();
+
 AIService aiService() => services().get();
 
 GoogleCloudService gcpService() => services().get();
 
 OpenAIService openaiService() => services().get();
 
-CredentialService credentialService() => services().get();
+DataService dataService() => services().get();
 
 abstract class AsyncStartupTasked {
   Future<void> onStartupTask();

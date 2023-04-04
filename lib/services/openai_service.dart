@@ -2,12 +2,18 @@ import 'package:ars_cognitio/sugar.dart';
 import 'package:dart_openai/openai.dart';
 
 class OpenAIService extends ArsCognitioStatelessService {
-  String _key() => credentialService().get("openai") ?? "";
-  String? _org() => credentialService().get("openai.org");
+  String getKey() => data().getSettings().openAiKey ?? "";
+
+  void setKey(String key) => saveData((d) => d.getSettings().openAiKey = key);
+
+  String? getOrg() => data().getSettings().openAiOrganization;
+
+  void setOrg(String org) =>
+      saveData((d) => d.getSettings().openAiOrganization = org);
 
   OpenAI client() {
-    OpenAI.apiKey = _key();
-    OpenAI.organization = _org();
+    OpenAI.apiKey = getKey();
+    OpenAI.organization = getOrg();
     return OpenAI.instance;
   }
 }

@@ -16,15 +16,28 @@ dependencies:
   universal_io: ^2.2.0
   fast_log: ^1.0.2
   precision_stopwatch: ^1.0.2
+  glitcheffect: ^1.1.1
   hive_flutter: ^1.1.0
   googleapis_auth: ^1.4.0
   http: ^0.13.5
   lzstring: ^2.0.0+2
+  json_serializable: ^6.6.1
+  json_annotation: ^4.8.0
   hive: ^2.2.3
   synchronized: ^3.0.1
+  path_provider: ^2.0.14
+  uuid: ^3.0.7
+  flutter_markdown: ^0.6.14
+  flutter_chat_ui: ^1.6.6
+  foil: ^0.9.0+1
+  settings_ui: ^2.0.2
+  tinycolor2: ^3.0.1
+  dialoger: ^1.0.0
+  padded: ^1.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.1
+  build_runner: ^2.3.3
 flutter:
   uses-material-design: true

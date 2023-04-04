@@ -6,8 +6,8 @@ import "package:googleapis_auth/auth_io.dart";
 
 class GoogleCloudService extends ArsCognitioStatelessService {
   Future<AuthClient> obtainCredentials() => clientViaServiceAccount(
-          ServiceAccountCredentials.fromJson(
-              jsonDecode(credentialService().get("gcp") ?? "")),
+          ServiceAccountCredentials.fromJson(jsonDecode(
+              data().getSettings().googleServiceAccountJson ?? "{}")),
           [
             VisionApi.cloudPlatformScope,
             VisionApi.cloudVisionScope,
