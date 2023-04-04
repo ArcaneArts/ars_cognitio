@@ -68,9 +68,24 @@ class ToolsMaterial extends StatelessWidget {
   const ToolsMaterial({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
+  Widget build(BuildContext context) => Scaffold(
+        body: ListView(
+          children: [
+            ListTile(
+              title: Text("Text to Image"),
+              subtitle: Text("Generate an Image from a prompt"),
+            ),
+            ListTile(
+              title: Text("Image to Image"),
+              subtitle: Text("Generate an Image from an Image & Prompt"),
+            ),
+            ListTile(
+              title: Text("Inpaint Image"),
+              subtitle: Text("Generate an Image from a Mask & Prompt"),
+            )
+          ],
+        ),
+      );
 }
 
 class ChatMaterial extends StatefulWidget {
@@ -199,6 +214,12 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
 
   void send(ChatMessage message) {
     setState(() {
+      if (message.message!.startsWith("/system ")) {
+        message = ChatMessage.create(
+            message: message.message!.substring(8),
+            role: OpenAIChatMessageRole.system);
+      }
+
       responseStream = chatService().addMessage(widget.conversation, message);
       responseStream = responseStream?.map((event) {
         if (event == null) {
