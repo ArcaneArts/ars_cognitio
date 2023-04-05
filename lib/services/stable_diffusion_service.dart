@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:ars_cognitio/model/diffusion_model.dart';
 import 'package:ars_cognitio/sugar.dart';
+import 'package:fast_log/fast_log.dart';
 import 'package:http/http.dart' as http;
+import 'package:snackbar/snackbar.dart';
 
 class StableDiffusionService extends ArsCognitioService {
   DiffusionModel defaultModel = DiffusionModel()
@@ -15,6 +17,23 @@ class StableDiffusionService extends ArsCognitioService {
 
   void setKey(String key) =>
       saveData((d) => d.getSettings().stableDiffusionApiKey = key);
+
+  Future<List<String>> _continueFetching(String fetchUrl) async {
+    await Future.delayed(const Duration(seconds: 3), () {});
+    var r = await http.post(Uri.parse(fetchUrl), body: {"key": getKey()});
+
+    info("Response: ${r.body}");
+    Map<String, dynamic> j = jsonDecode(r.body);
+    if (j["status"] == "success") {
+      info("Finally got the image!");
+      return (j["output"] as List<dynamic>)
+          .map((e) => e.toString().replaceAll("\\", "/"))
+          .toList();
+    } else {
+      info("Still waiting for the image...");
+      return _continueFetching(fetchUrl);
+    }
+  }
 
   Future<List<String>> text2Image({
     required DiffusionModel model,
@@ -86,9 +105,42 @@ class StableDiffusionService extends ArsCognitioService {
             "prompt_strength": promptStrength.toString(),
             "width": "$width",
             "height": "$height",
-          }).then((value) => (jsonDecode(value.body)["output"] as List<dynamic>)
-          .map((e) => e.toString())
-          .toList());
+          }).then((value) {
+        info("Response: ${value.body}");
+        Map<String, dynamic> j = jsonDecode(value.body);
+        if (j["status"] == "error") {
+          error(j["message"]);
+          snack(j["message"]);
+          return [];
+        }
+
+        if (j["status"] == "processing" && j["fetch_result"] != null) {
+          return _continueFetching(j["fetch_result"]);
+        }
+
+        try {
+          return (j["output"] as List<dynamic>)
+              .map((e) => e.toString())
+              .toList();
+        } catch (e, es) {
+          error(e);
+          error(es);
+          warn(value.body);
+        }
+
+        return [];
+      });
+
+  Future<bool> serverDeleteImage(String image) async {
+    var r = await http.post(
+        Uri.parse("https://stablediffusionapi.com/api/v3/delete_image"),
+        body: {
+          "key": getKey(),
+          "image": image.split("/").last,
+        });
+    info("Response: ${r.body}");
+    return r.statusCode == 200;
+  }
 
   Future<List<String>> _text2ImageCommunity({
     String? prompt,
@@ -119,9 +171,25 @@ class StableDiffusionService extends ArsCognitioService {
             "prompt_strength": promptStrength.toString(),
             "width": "$width",
             "height": "$height",
-          }).then((value) => (jsonDecode(value.body)["output"] as List<dynamic>)
-          .map((e) => e.toString())
-          .toList());
+          }).then((value) {
+        info("Response: ${value.body}");
+        Map<String, dynamic> j = jsonDecode(value.body);
+        if (j["status"] == "processing" && j["fetch_result"] != null) {
+          return _continueFetching(j["fetch_result"]);
+        }
+
+        try {
+          return (j["output"] as List<dynamic>)
+              .map((e) => e.toString())
+              .toList();
+        } catch (e, es) {
+          error(e);
+          error(es);
+          warn(value.body);
+        }
+
+        return [];
+      });
 
   Future<List<DiffusionModel>> listModels() => _models;
 

@@ -4,6 +4,7 @@ import 'package:ars_cognitio/ui/image.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
 import 'package:padded/padded.dart';
+import 'package:snackbar/snackbar.dart';
 
 class DiffusionScreen extends StatefulWidget {
   const DiffusionScreen({Key? key}) : super(key: key);
@@ -13,17 +14,12 @@ class DiffusionScreen extends StatefulWidget {
 }
 
 class _DiffusionScreenState extends State<DiffusionScreen> {
+  bool loading = false;
   TextEditingController controller = TextEditingController();
   TextEditingController prompt = TextEditingController();
   TextEditingController negativePrompt = TextEditingController();
   DiffusionModel model = stableDiffusionService().defaultModel;
-  bool enhancePrompt = true;
-  bool safetyChecker = false;
-  double promptStrength = 0.85;
-  double guidanceScale = 11.5;
-  int inferenceSteps = 50;
-  int width = 800;
-  int height = 800;
+
   @override
   Widget build(BuildContext context) => DefaultTabController(
       length: 3,
@@ -44,7 +40,13 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                       menuHeight: 500,
                       dropdownMenuEntries: [
                         ...snap.data!.map((e) => DropdownMenuEntry(
-                            value: e, label: e.name ?? "Unnamed Model?"))
+                            trailingIcon: IconButton(
+                              icon: Icon(Icons.info_rounded),
+                              onPressed: () {},
+                              tooltip: e.description ?? "No description",
+                            ),
+                            value: e,
+                            label: e.name ?? "Unnamed Model?"))
                       ],
                     )
                   : SizedBox(
@@ -66,27 +68,47 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
             Scaffold(
               floatingActionButton: FloatingActionButton(
                 onPressed: () async {
+                  setState(() {
+                    loading = true;
+                  });
                   await stableDiffusionService()
                       .text2Image(
                           model: model,
                           prompt: prompt.text,
-                          enhancePrompt: enhancePrompt,
-                          width: width,
-                          height: height,
-                          inferenceSteps: inferenceSteps,
-                          guidanceScale: guidanceScale,
-                          promptStrength: promptStrength,
-                          safetyChecker: safetyChecker,
+                          enhancePrompt:
+                              data().getSettings().enhancePrompt ?? true,
+                          width: data().getSettings().width ?? 512,
+                          height: data().getSettings().height ?? 512,
+                          inferenceSteps:
+                              data().getSettings().inferenceSteps ?? 50,
+                          guidanceScale:
+                              data().getSettings().guidanceScale ?? 7.5,
+                          promptStrength:
+                              data().getSettings().promptStrength ?? 0.85,
+                          safetyChecker:
+                              data().getSettings().safetyChecker ?? true,
                           negativePrompt: negativePrompt.text)
-                      .then((value) => setState(() {
-                            saveData((d) {
-                              for (var i in value.reversed) {
-                                d.getGenerated().insert(0, i);
-                              }
-                            });
-                          }));
+                      .then((value) {
+                    saveData((d) {
+                      for (var i in value.reversed) {
+                        d.getGenerated().insert(0, i);
+                      }
+                    });
+
+                    setState(() {
+                      if (value.isEmpty) {
+                        snack(
+                            "Failed to receive any images from the server. Please try again later.");
+                      }
+                      setState(() {
+                        loading = false;
+                      });
+                    });
+                  });
                 },
-                child: const Icon(Icons.auto_awesome_rounded),
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : const Icon(Icons.auto_awesome_rounded),
               ),
               body: Padding(
                 padding: EdgeInsets.all(14),
@@ -114,76 +136,108 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                         children: [
                           SwitchListTile(
                               title: Text("Safetey Checker"),
-                              value: safetyChecker,
+                              value: data().getSettings().safetyChecker ?? true,
                               onChanged: (b) => setState(() {
-                                    safetyChecker = b;
+                                    saveData((d) =>
+                                        d.getSettings().safetyChecker = b);
                                   })),
                           SwitchListTile(
                               title: Text("Prompt Enhancer"),
-                              value: enhancePrompt,
+                              value: data().getSettings().enhancePrompt ?? true,
                               onChanged: (b) => setState(() {
-                                    enhancePrompt = b;
+                                    saveData((d) =>
+                                        d.getSettings().enhancePrompt = b);
                                   })),
                           ListTile(
-                            title: Text("Width $width"),
+                            title: Text(
+                                "Width ${(data().getSettings().width ?? 512)}"),
                             subtitle: Slider(
-                                value: width.toDouble(),
-                                label: width.toString(),
+                                value: (data().getSettings().width ?? 512)
+                                    .toDouble(),
+                                label: (data().getSettings().width ?? 512)
+                                    .toString(),
                                 divisions: 800,
                                 max: 800,
                                 min: 2,
                                 onChanged: (d) => setState(() {
-                                      width = d.round();
-                                    })),
-                          ),
-                          ListTile(
-                            title: Text("Height $height"),
-                            subtitle: Slider(
-                                value: height.toDouble(),
-                                label: height.toString(),
-                                divisions: 800,
-                                max: 800,
-                                min: 2,
-                                onChanged: (d) => setState(() {
-                                      height = d.round();
+                                      saveData((dx) {
+                                        int width = d.round();
+                                        width = (width ~/ 8) * 8;
+                                        width = width < 8 ? 8 : width;
+                                        dx.getSettings().width = width;
+                                      });
                                     })),
                           ),
                           ListTile(
                             title: Text(
-                                "Prompt Strength ${(promptStrength * 100).toInt()}%"),
+                                "Height ${(data().getSettings().height ?? 512)}"),
                             subtitle: Slider(
-                                value: promptStrength,
-                                label: "${(promptStrength * 100).toInt()}%",
+                                value: (data().getSettings().height ?? 512)
+                                    .toDouble(),
+                                label: (data().getSettings().height ?? 512)
+                                    .toString(),
+                                divisions: 800,
+                                max: 800,
+                                min: 2,
+                                onChanged: (d) => setState(() {
+                                      saveData((dx) {
+                                        int height = d.round();
+                                        height = (height ~/ 8) * 8;
+                                        height = height < 8 ? 8 : height;
+                                        dx.getSettings().height = height;
+                                      });
+                                    })),
+                          ),
+                          ListTile(
+                            title: Text(
+                                "Prompt Strength ${((data().getSettings().promptStrength ?? 0.85) * 100).toInt()}%"),
+                            subtitle: Slider(
+                                value:
+                                    data().getSettings().promptStrength ?? 0.85,
+                                label:
+                                    "${((data().getSettings().promptStrength ?? 0.85) * 100).toInt()}%",
                                 max: 1,
                                 min: 0,
                                 divisions: 100,
                                 onChanged: (d) => setState(() {
-                                      promptStrength = d;
-                                    })),
-                          ),
-                          ListTile(
-                            title: Text("Inference Steps $inferenceSteps"),
-                            subtitle: Slider(
-                                value: inferenceSteps.toDouble(),
-                                label: inferenceSteps.toString(),
-                                max: 50,
-                                min: 0,
-                                divisions: 50,
-                                onChanged: (d) => setState(() {
-                                      inferenceSteps = d.round();
+                                      saveData((dx) =>
+                                          dx.getSettings().promptStrength = d);
                                     })),
                           ),
                           ListTile(
                             title: Text(
-                                "Guidance Scale ${guidanceScale.toStringAsFixed(1)}"),
+                                "Inference Steps ${(data().getSettings().inferenceSteps ?? 50)}"),
                             subtitle: Slider(
-                                value: guidanceScale,
-                                label: guidanceScale.toStringAsFixed(1),
+                                value:
+                                    (data().getSettings().inferenceSteps ?? 50)
+                                        .toDouble(),
+                                label:
+                                    (data().getSettings().inferenceSteps ?? 50)
+                                        .toString(),
+                                max: 50,
+                                min: 0,
+                                divisions: 50,
+                                onChanged: (d) => setState(() {
+                                      saveData((dx) => dx
+                                          .getSettings()
+                                          .inferenceSteps = d.round());
+                                    })),
+                          ),
+                          ListTile(
+                            title: Text(
+                                "Guidance Scale ${(data().getSettings().guidanceScale ?? 7.5).toStringAsFixed(1)}"),
+                            subtitle: Slider(
+                                value:
+                                    (data().getSettings().guidanceScale ?? 7.5),
+                                label:
+                                    (data().getSettings().guidanceScale ?? 7.5)
+                                        .toStringAsFixed(1),
                                 divisions: 200,
                                 max: 20,
                                 min: 0,
                                 onChanged: (d) => setState(() {
-                                      guidanceScale = d;
+                                      saveData((dx) =>
+                                          dx.getSettings().guidanceScale = d);
                                     })),
                           )
                         ],
@@ -220,7 +274,9 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                             child: ClipRRect(
                                 borderRadius: BorderRadius.circular(24),
                                 child: Image.network(
-                                    data().getGenerated()[index])),
+                                  data().getGenerated()[index],
+                                  fit: BoxFit.cover,
+                                )),
                           ),
                         ),
                         itemCount: data().getGenerated().length,

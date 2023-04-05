@@ -11,13 +11,14 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chat;
 import 'package:foil/foil.dart';
+import 'package:get/get.dart';
 import 'package:tinycolor2/tinycolor2.dart';
 
 class ArsCognitioMaterialApp extends StatelessWidget {
   const ArsCognitioMaterialApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context) => GetMaterialApp(
         title: 'Ars Cognitio',
         theme: ThemeData.light(useMaterial3: true).copyWith(),
         darkTheme: ThemeData.dark(useMaterial3: true).copyWith(),
