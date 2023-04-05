@@ -2,15 +2,12 @@
 
 No more puffed up subscriptions. Connect your cloud keys directly to your phone and move on!
 
-## Getting Started
+## Usage
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Open the app and go to the settings tab
+2. Sign up as a developer account for OpenAI
+3. Go to https://platform.openai.com/account/api-keys and create / copy the api key
+4. Paste that into Ars Cognitio
+5. (if ogranization) Go to https://platform.openai.com/account/org-settings  and paste that into the OpenAI org box
+6. If you want image generation, sign up for https://stablediffusionapi.com/ ($10/mo)
+7. Go to https://stablediffusionapi.com/settings/api and copy your API key and paste it into Ars Cognitio
