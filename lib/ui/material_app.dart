@@ -3,14 +3,10 @@ import 'package:ars_cognitio/model/chat/chat_message.dart';
 import 'package:ars_cognitio/sugar.dart';
 import 'package:ars_cognitio/ui/home.dart';
 import 'package:dart_openai/openai.dart';
-import 'package:dialoger/dialoger.dart';
-import 'package:fast_log/fast_log.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
-
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chat;
-import 'package:foil/foil.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:tinycolor2/tinycolor2.dart';
 
@@ -20,6 +16,7 @@ class ArsCognitioMaterialApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => GetMaterialApp(
         title: 'Ars Cognitio',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData.light(useMaterial3: true).copyWith(),
         darkTheme: ThemeData.dark(useMaterial3: true).copyWith(),
         home: const HomeScreen(),

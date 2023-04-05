@@ -36,6 +36,10 @@ dependencies:
   padded: ^1.0.1
   snackbar: ^1.0.2
   get: ^4.6.5
+  file_picker: ^5.2.7
+  sliver_tools: ^0.2.9
+  toxic: ^1.0.3
+  memcached: ^1.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

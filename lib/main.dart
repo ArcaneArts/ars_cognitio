@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:ars_cognitio/services/ai_service.dart';
 import 'package:ars_cognitio/services/chat_service.dart';
 import 'package:ars_cognitio/services/data_service.dart';
+import 'package:ars_cognitio/services/diffusion_service.dart';
 import 'package:ars_cognitio/services/gcp_service.dart';
 import 'package:ars_cognitio/services/openai_service.dart';
-import 'package:ars_cognitio/services/stable_diffusion_service.dart';
 import 'package:ars_cognitio/sugar.dart';
 import 'package:ars_cognitio/ui/material_app.dart';
 import 'package:fast_log/fast_log.dart';
@@ -36,5 +36,5 @@ Future<void> _init() async {
   services().register(() => GoogleCloudService());
   services().register(() => OpenAIService());
   services().register(() => ChatService());
-  services().register(() => StableDiffusionService());
+  services().register(() => DiffusionService());
 }

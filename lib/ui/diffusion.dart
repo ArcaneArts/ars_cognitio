@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:ars_cognitio/model/diffusion_model.dart';
+import 'package:ars_cognitio/services/diffusion_service.dart';
 import 'package:ars_cognitio/sugar.dart';
+import 'package:ars_cognitio/ui/diffusion_settings.dart';
 import 'package:ars_cognitio/ui/image.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:padded/padded.dart';
 import 'package:snackbar/snackbar.dart';
 
@@ -19,13 +24,41 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
   TextEditingController prompt = TextEditingController();
   TextEditingController negativePrompt = TextEditingController();
   DiffusionModel model = stableDiffusionService().defaultModel;
+  String? initImageUrl;
+  late final Timer _timer;
 
   @override
-  Widget build(BuildContext context) => DefaultTabController(
-      length: 3,
-      child: Scaffold(
+  void initState() {
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+      setState(() {
+        stableDiffusionService().systemLoad();
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           actions: [
+            PaddingRight(
+              padding: 14,
+              child: StreamBuilder<SystemLoad>(
+                stream: stableDiffusionService().streamSystemLoad(),
+                builder: (context, snap) => snap.hasData
+                    ? Text(
+                        "${snap.data!.queued} Queued, ${snap.data!.queueTime}s ETA")
+                    : const SizedBox(
+                        height: 0,
+                      ),
+              ),
+            ),
             FutureBuilder<List<DiffusionModel>>(
               future: stableDiffusionService().listModels(),
               builder: (context, snap) => snap.hasData
@@ -55,22 +88,51 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
             )
           ],
           title: const Text("Diffusion"),
-          bottom: TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.text_fields_rounded), text: "Text to Image"),
-              Tab(icon: Icon(Icons.image_rounded), text: "Image to Image"),
-              Tab(icon: Icon(Icons.format_paint_rounded), text: "Inpainting"),
-            ],
-          ),
         ),
-        body: TabBarView(
-          children: [
-            Scaffold(
-              floatingActionButton: FloatingActionButton(
-                onPressed: () async {
-                  setState(() {
-                    loading = true;
+        body: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: () async {
+                setState(() {
+                  loading = true;
+                });
+
+                if (initImageUrl != null) {
+                  await stableDiffusionService()
+                      .image2Image(
+                          model: model,
+                          init: initImageUrl!,
+                          prompt: prompt.text,
+                          enhancePrompt:
+                              data().getSettings().enhancePrompt ?? true,
+                          width: data().getSettings().width ?? 512,
+                          height: data().getSettings().height ?? 512,
+                          inferenceSteps:
+                              data().getSettings().inferenceSteps ?? 50,
+                          guidanceScale:
+                              data().getSettings().guidanceScale ?? 7.5,
+                          promptStrength:
+                              data().getSettings().promptStrength ?? 0.85,
+                          safetyChecker:
+                              data().getSettings().safetyChecker ?? true,
+                          negativePrompt: negativePrompt.text)
+                      .then((value) {
+                    saveData((d) {
+                      for (var i in value.reversed) {
+                        d.getGenerated().insert(0, i);
+                      }
+                    });
+
+                    setState(() {
+                      if (value.isEmpty) {
+                        snack(
+                            "Failed to receive any images from the server. Please try again later.");
+                      }
+                      setState(() {
+                        loading = false;
+                      });
+                    });
                   });
+                } else {
                   await stableDiffusionService()
                       .text2Image(
                           model: model,
@@ -105,190 +167,136 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                       });
                     });
                   });
-                },
-                child: loading
-                    ? const CircularProgressIndicator()
-                    : const Icon(Icons.auto_awesome_rounded),
-              ),
-              body: Padding(
-                padding: EdgeInsets.all(14),
-                child: ListView(
-                  children: [
-                    TextField(
-                      controller: prompt,
-                      decoration: const InputDecoration(
-                          hintText: "Enter a prompt",
-                          border: OutlineInputBorder(),
-                          label: Text("Prompt")),
-                    ),
-                    PaddingTop(
-                        padding: 14,
-                        child: TextField(
-                            controller: negativePrompt,
-                            decoration: const InputDecoration(
-                                hintText: "Enter a negative prompt",
-                                border: OutlineInputBorder(),
-                                label: Text("Negative Prompt")))),
-                    PaddingTop(
-                      padding: 14,
-                      child: ExpansionTile(
-                        title: Text("Advanced Configuration"),
-                        children: [
-                          SwitchListTile(
-                              title: Text("Safetey Checker"),
-                              value: data().getSettings().safetyChecker ?? true,
-                              onChanged: (b) => setState(() {
-                                    saveData((d) =>
-                                        d.getSettings().safetyChecker = b);
-                                  })),
-                          SwitchListTile(
-                              title: Text("Prompt Enhancer"),
-                              value: data().getSettings().enhancePrompt ?? true,
-                              onChanged: (b) => setState(() {
-                                    saveData((d) =>
-                                        d.getSettings().enhancePrompt = b);
-                                  })),
-                          ListTile(
-                            title: Text(
-                                "Width ${(data().getSettings().width ?? 512)}"),
-                            subtitle: Slider(
-                                value: (data().getSettings().width ?? 512)
-                                    .toDouble(),
-                                label: (data().getSettings().width ?? 512)
-                                    .toString(),
-                                divisions: 800,
-                                max: 800,
-                                min: 2,
-                                onChanged: (d) => setState(() {
-                                      saveData((dx) {
-                                        int width = d.round();
-                                        width = (width ~/ 8) * 8;
-                                        width = width < 8 ? 8 : width;
-                                        dx.getSettings().width = width;
-                                      });
-                                    })),
-                          ),
-                          ListTile(
-                            title: Text(
-                                "Height ${(data().getSettings().height ?? 512)}"),
-                            subtitle: Slider(
-                                value: (data().getSettings().height ?? 512)
-                                    .toDouble(),
-                                label: (data().getSettings().height ?? 512)
-                                    .toString(),
-                                divisions: 800,
-                                max: 800,
-                                min: 2,
-                                onChanged: (d) => setState(() {
-                                      saveData((dx) {
-                                        int height = d.round();
-                                        height = (height ~/ 8) * 8;
-                                        height = height < 8 ? 8 : height;
-                                        dx.getSettings().height = height;
-                                      });
-                                    })),
-                          ),
-                          ListTile(
-                            title: Text(
-                                "Prompt Strength ${((data().getSettings().promptStrength ?? 0.85) * 100).toInt()}%"),
-                            subtitle: Slider(
-                                value:
-                                    data().getSettings().promptStrength ?? 0.85,
-                                label:
-                                    "${((data().getSettings().promptStrength ?? 0.85) * 100).toInt()}%",
-                                max: 1,
-                                min: 0,
-                                divisions: 100,
-                                onChanged: (d) => setState(() {
-                                      saveData((dx) =>
-                                          dx.getSettings().promptStrength = d);
-                                    })),
-                          ),
-                          ListTile(
-                            title: Text(
-                                "Inference Steps ${(data().getSettings().inferenceSteps ?? 50)}"),
-                            subtitle: Slider(
-                                value:
-                                    (data().getSettings().inferenceSteps ?? 50)
-                                        .toDouble(),
-                                label:
-                                    (data().getSettings().inferenceSteps ?? 50)
-                                        .toString(),
-                                max: 50,
-                                min: 0,
-                                divisions: 50,
-                                onChanged: (d) => setState(() {
-                                      saveData((dx) => dx
-                                          .getSettings()
-                                          .inferenceSteps = d.round());
-                                    })),
-                          ),
-                          ListTile(
-                            title: Text(
-                                "Guidance Scale ${(data().getSettings().guidanceScale ?? 7.5).toStringAsFixed(1)}"),
-                            subtitle: Slider(
-                                value:
-                                    (data().getSettings().guidanceScale ?? 7.5),
-                                label:
-                                    (data().getSettings().guidanceScale ?? 7.5)
-                                        .toStringAsFixed(1),
-                                divisions: 200,
-                                max: 20,
-                                min: 0,
-                                onChanged: (d) => setState(() {
-                                      saveData((dx) =>
-                                          dx.getSettings().guidanceScale = d);
-                                    })),
-                          )
-                        ],
-                      ),
-                    ),
-                    PaddingVertical(
-                      padding: 14,
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount:
-                                MediaQuery.of(context).size.width ~/ 350),
-                        itemBuilder: (context, index) => PaddingAll(
-                          padding: 7,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(24),
-                            onLongPress: () => dialogConfirm(
-                                context: context,
-                                title: "Delete?",
-                                description: "Are you sure?",
-                                confirmButtonText: "Delete",
-                                onConfirm: (context) => setState(() {
-                                      saveData((d) {
-                                        d.getGenerated().removeAt(index);
-                                      });
-                                    })),
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ImageScreen(
-                                          image: data().getGenerated()[index],
-                                        ))),
-                            child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: Image.network(
-                                  data().getGenerated()[index],
-                                  fit: BoxFit.cover,
-                                )),
-                          ),
-                        ),
-                        itemCount: data().getGenerated().length,
-                      ),
-                    )
-                  ],
-                ),
-              ),
+                }
+              },
+              child: loading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.auto_awesome_rounded),
             ),
-            Text("NYI"),
-            Text("NYI"),
-          ],
-        ),
-      ));
+            body: CustomScrollView(
+              slivers: [
+                SliverList(
+                    delegate: SliverChildListDelegate([
+                  PaddingAll(
+                      padding: 14,
+                      child: Row(
+                        children: [
+                          PaddingRight(
+                              padding: 14,
+                              child: initImageUrl != null
+                                  ? InkWell(
+                                      borderRadius: BorderRadius.circular(24),
+                                      onLongPress: () => setState(() {
+                                        initImageUrl = null;
+                                      }),
+                                      onTap: () => setState(() {
+                                        Clipboard.getData("text/plain")
+                                            .then((value) {
+                                          setState(() {
+                                            initImageUrl = value?.text ?? "";
+                                          });
+                                        });
+                                      }),
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                          child: Image.network(
+                                            initImageUrl!,
+                                            width: 129,
+                                            height: 129,
+                                            fit: BoxFit.cover,
+                                          )),
+                                    )
+                                  : ElevatedButton(
+                                      child: const Text("Image URL"),
+                                      onPressed: () {
+                                        Clipboard.getData("text/plain")
+                                            .then((value) {
+                                          if (value != null) {
+                                            setState(() {
+                                              initImageUrl = value.text ?? "";
+                                            });
+                                          }
+                                        });
+                                      },
+                                    )),
+                          Flexible(
+                              child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                controller: prompt,
+                                decoration: const InputDecoration(
+                                    hintText: "Enter a prompt",
+                                    border: OutlineInputBorder(),
+                                    label: Text("Prompt")),
+                              ),
+                              PaddingTop(
+                                  padding: 14,
+                                  child: TextField(
+                                      controller: negativePrompt,
+                                      decoration: const InputDecoration(
+                                          hintText: "Enter a negative prompt",
+                                          border: OutlineInputBorder(),
+                                          label: Text("Negative Prompt"))))
+                            ],
+                          ))
+                        ],
+                      )),
+                  const PaddingAll(
+                    padding: 14,
+                    child: ExpansionTile(
+                      title: Text("Advanced Configuration"),
+                      children: [DiffusionSettings()],
+                    ),
+                  )
+                ])),
+                SliverGrid(
+                    delegate: SliverChildBuilderDelegate(
+                        (context, index) => PaddingAll(
+                              padding: 14,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black.withOpacity(0.5),
+                                          blurRadius: 36,
+                                          spreadRadius: 12)
+                                    ]),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(24),
+                                  onLongPress: () => dialogConfirm(
+                                      context: context,
+                                      title: "Delete?",
+                                      description: "Are you sure?",
+                                      confirmButtonText: "Delete",
+                                      onConfirm: (context) => setState(() {
+                                            saveData((d) {
+                                              d.getGenerated().removeAt(index);
+                                            });
+                                          })),
+                                  onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ImageScreen(
+                                                image: data()
+                                                    .getGenerated()[index],
+                                              ))),
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: Image.network(
+                                        data().getGenerated()[index],
+                                        fit: BoxFit.cover,
+                                      )),
+                                ),
+                              ),
+                            ),
+                        childCount: data().getGenerated().length),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount:
+                            MediaQuery.of(context).size.width ~/ 350))
+              ],
+            )),
+      );
 }
