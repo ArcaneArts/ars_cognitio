@@ -1,6 +1,6 @@
 import 'package:ars_cognitio/ui/chat.dart';
-import 'package:ars_cognitio/ui/settings.dart';
 import 'package:ars_cognitio/ui/diffusion.dart';
+import 'package:ars_cognitio/ui/settings.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -35,9 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: "Chat",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.label_outline_rounded),
-            activeIcon: Icon(Icons.label_rounded),
-            label: "More",
+            icon: Icon(Icons.settings_outlined),
+            activeIcon: Icon(Icons.settings_rounded),
+            label: "Settings",
           ),
         ],
       ));

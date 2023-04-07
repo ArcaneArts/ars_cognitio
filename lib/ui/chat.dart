@@ -2,6 +2,7 @@ import 'package:ars_cognitio/sugar.dart';
 import 'package:ars_cognitio/ui/material_app.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
+import 'package:padded/padded.dart';
 
 class ChatsScreen extends StatefulWidget {
   const ChatsScreen({Key? key}) : super(key: key);
@@ -13,13 +14,20 @@ class ChatsScreen extends StatefulWidget {
 class _ChatsScreenState extends State<ChatsScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add_rounded),
-            onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ChatViewScreenMaterial(
-                        conversation: chatService().newChat())))),
+        appBar: AppBar(
+          title: const Text("Chat"),
+          actions: [
+            PaddingRight(
+                padding: 14,
+                child: IconButton(
+                    icon: const Icon(Icons.add_rounded),
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ChatViewScreenMaterial(
+                                conversation: chatService().newChat())))))
+          ],
+        ),
         body: ListView.builder(
           itemCount: chatService().getChats().length,
           itemBuilder: (context, index) => chatService().getChats().length >

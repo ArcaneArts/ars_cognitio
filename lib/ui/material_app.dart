@@ -18,7 +18,18 @@ class ArsCognitioMaterialApp extends StatelessWidget {
         title: 'Ars Cognitio',
         debugShowCheckedModeBanner: false,
         theme: ThemeData.light(useMaterial3: true).copyWith(),
-        darkTheme: ThemeData.dark(useMaterial3: true).copyWith(),
+        darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
+          useMaterial3: true,
+          splashFactory: NoSplash.splashFactory,
+          listTileTheme: ListTileThemeData(
+              dense: false, visualDensity: VisualDensity.compact),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              type: BottomNavigationBarType.fixed,
+              enableFeedback: false,
+              showUnselectedLabels: false),
+        ),
         home: const HomeScreen(),
       );
 }
