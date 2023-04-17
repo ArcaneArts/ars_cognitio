@@ -8,6 +8,7 @@
  */
 
 import 'package:ars_cognitio/model/chat/chat.dart';
+import 'package:ars_cognitio/model/generated_image.dart';
 import 'package:ars_cognitio/model/settings.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -17,11 +18,11 @@ part 'data.g.dart';
 class Data {
   List<Chat>? chats;
   Settings? settings;
-  List<String>? generated;
+  List<GeneratedImage>? generatedImages;
 
-  List<String> getGenerated() {
-    generated ??= [];
-    return generated!;
+  List<GeneratedImage> getGenerated() {
+    generatedImages ??= [];
+    return generatedImages!;
   }
 
   List<Chat> getChats() {

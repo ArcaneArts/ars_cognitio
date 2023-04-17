@@ -8,6 +8,7 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chat;
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tinycolor2/tinycolor2.dart';
 
 class ArsCognitioMaterialApp extends StatelessWidget {
@@ -20,10 +21,10 @@ class ArsCognitioMaterialApp extends StatelessWidget {
         theme: ThemeData.light(useMaterial3: true).copyWith(),
         darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
           useMaterial3: true,
-          splashFactory: NoSplash.splashFactory,
-          listTileTheme: ListTileThemeData(
+          splashFactory: InkSparkle.splashFactory,
+          listTileTheme: const ListTileThemeData(
               dense: false, visualDensity: VisualDensity.compact),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
               elevation: 0,
               backgroundColor: Colors.transparent,
               type: BottomNavigationBarType.fixed,
@@ -43,6 +44,17 @@ class MarkdownText extends StatelessWidget {
   Widget build(BuildContext context) => MarkdownBody(
         data: content,
         selectable: true,
+        styleSheet: MarkdownStyleSheet(
+          pPadding: EdgeInsets.only(top: 5, bottom: 5),
+          tableBorder: TableBorder.all(
+              borderRadius: BorderRadius.circular(7),
+              width: 1,
+              color: Theme.of(context)
+                  .textTheme
+                  .bodyMedium!
+                  .color!
+                  .withOpacity(0.5)),
+        ),
       );
 }
 
@@ -162,7 +174,40 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                 stream: responseStream!,
                 builder: (context, snap) => Padding(
                   padding: const EdgeInsets.all(14),
-                  child: MarkdownText(content: snap.data ?? "..."),
+                  child: Shimmer(
+                      gradient: LinearGradient(colors: [
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        ColorTween(
+                                begin: Colors.indigoAccent,
+                                end: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .color!)
+                            .lerp(0.5)!,
+                        ColorTween(
+                                begin: Colors.deepPurpleAccent,
+                                end: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .color!)
+                            .lerp(0.5)!,
+                        ColorTween(
+                                begin: Colors.purpleAccent,
+                                end: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .color!)
+                            .lerp(0.5)!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                      ]),
+                      period: Duration(seconds: 3),
+                      child: MarkdownText(content: snap.data ?? "...")),
                 ),
               );
             }

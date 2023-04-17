@@ -22,10 +22,11 @@ class _ChatsScreenState extends State<ChatsScreen> {
                 child: IconButton(
                     icon: const Icon(Icons.add_rounded),
                     onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ChatViewScreenMaterial(
-                                conversation: chatService().newChat())))))
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChatViewScreenMaterial(
+                                    conversation: chatService().newChat())))
+                        .then((value) => setState(() {}))))
           ],
         ),
         body: ListView.builder(

@@ -13,11 +13,12 @@ Data _$DataFromJson(Map<String, dynamic> json) => Data()
   ..settings = json['settings'] == null
       ? null
       : Settings.fromJson(json['settings'] as Map<String, dynamic>)
-  ..generated =
-      (json['generated'] as List<dynamic>?)?.map((e) => e as String).toList();
+  ..generatedImages = (json['generatedImages'] as List<dynamic>?)
+      ?.map((e) => GeneratedImage.fromJson(e as Map<String, dynamic>))
+      .toList();
 
 Map<String, dynamic> _$DataToJson(Data instance) => <String, dynamic>{
       'chats': instance.chats,
       'settings': instance.settings,
-      'generated': instance.generated,
+      'generatedImages': instance.generatedImages,
     };

@@ -2,11 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:ars_cognitio/model/diffusion_model.dart';
+import 'package:ars_cognitio/model/generated_image.dart';
 import 'package:ars_cognitio/sugar.dart';
+import 'package:dialoger/dialoger.dart';
 import 'package:fast_log/fast_log.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:memcached/memcached.dart';
 import 'package:snackbar/snackbar.dart';
+
+List<String> thoseModels = [
+  "f22-diffusion",
+  "grapefruit-nsfw-anim",
+  "renwu",
+  "urpm"
+];
 
 class SystemLoad {
   int queued;
@@ -70,11 +80,10 @@ class DiffusionService extends ArsCognitioService {
     }
   }
 
-  Future<List<String>> text2Image({
+  Future<GeneratedImage> text2Image({
     required DiffusionModel model,
     String? prompt,
     String? negativePrompt,
-    int samples = 1,
     double promptStrength = 0.5,
     int width = 512,
     int height = 512,
@@ -84,34 +93,47 @@ class DiffusionService extends ArsCognitioService {
     bool enhancePrompt = true,
     bool safetyChecker = true,
   }) =>
-      model.id == defaultModel.id
-          ? _text2ImageStableDiffusion(
-              prompt: prompt,
-              negativePrompt: negativePrompt,
-              samples: samples,
-              promptStrength: promptStrength,
-              width: width,
-              height: height,
-              inferenceSteps: inferenceSteps,
-              guidanceScale: guidanceScale,
-              seed: seed,
-              enhancePrompt: enhancePrompt,
-              safetyChecker: safetyChecker,
-            )
-          : _text2ImageCommunity(
-              prompt: prompt,
-              model: model.id,
-              negativePrompt: negativePrompt,
-              samples: samples,
-              promptStrength: promptStrength,
-              width: width,
-              height: height,
-              inferenceSteps: inferenceSteps,
-              guidanceScale: guidanceScale,
-              seed: seed,
-              enhancePrompt: enhancePrompt,
-              safetyChecker: safetyChecker,
-            );
+      (model.id == defaultModel.id
+              ? _text2ImageStableDiffusion(
+                  prompt: prompt,
+                  negativePrompt: negativePrompt,
+                  samples: 1,
+                  promptStrength: promptStrength,
+                  width: width,
+                  height: height,
+                  inferenceSteps: inferenceSteps,
+                  guidanceScale: guidanceScale,
+                  seed: seed,
+                  enhancePrompt: enhancePrompt,
+                  safetyChecker: safetyChecker,
+                )
+              : _text2ImageCommunity(
+                  prompt: prompt,
+                  model: model.id,
+                  negativePrompt: negativePrompt,
+                  samples: 1,
+                  promptStrength: promptStrength,
+                  width: width,
+                  height: height,
+                  inferenceSteps: inferenceSteps,
+                  guidanceScale: guidanceScale,
+                  seed: seed,
+                  enhancePrompt: enhancePrompt,
+                  safetyChecker: safetyChecker,
+                ))
+          .then((value) => GeneratedImage()
+            ..image = value[0]
+            ..inferenceSteps = inferenceSteps
+            ..promptStrength = promptStrength
+            ..prompt = prompt
+            ..width = width
+            ..height = height
+            ..enhancePrompt = enhancePrompt
+            ..safetyChecker = safetyChecker
+            ..guidanceScale = guidanceScale
+            ..negativePrompt = negativePrompt
+            ..model = model.id
+            ..seed = seed);
 
   Future<List<String>> _text2ImageStableDiffusion({
     String? prompt,
@@ -166,6 +188,26 @@ class DiffusionService extends ArsCognitioService {
         return [];
       });
 
+  void deleteDialog(BuildContext context, String image) => dialogConfirm(
+      context: context,
+      title: "Delete Image?",
+      description:
+          "An attempt will be made to delete it off of the Stable Diffusion API's history, if it succeeds, we will also delete it here, otherwise it wont be deleted here.\n\nNote: Thumbnails & API History is still stored on the StableDiffusion API Servers & Dashboard!",
+      confirmButtonText: "Server Delete",
+      onConfirm: (context) {
+        stableDiffusionService().serverDeleteImage(image).then((value) {
+          if (value) {
+            snack("Successful Server Delete!");
+            saveData((d) =>
+                d.getGenerated().removeWhere((element) => element == image));
+            Future.delayed(
+                Duration(milliseconds: 50), () => Navigator.pop(context));
+          } else {
+            snack("Failed Server Delete!");
+          }
+        });
+      });
+
   Future<bool> serverDeleteImage(String image) async {
     var r = await http.post(
         Uri.parse("https://stablediffusionapi.com/api/v3/delete_image"),
@@ -175,6 +217,21 @@ class DiffusionService extends ArsCognitioService {
         });
     info("Response: ${r.body}");
     return r.statusCode == 200;
+  }
+
+  Future<String> superResolution(String url, double scale,
+      {bool enhanceFace = false}) async {
+    var r = await http.post(
+        Uri.parse("https://stablediffusionapi.com/api/v3/super_resolution"),
+        body: {
+          "key": getKey(),
+          "scale": scale.toString(),
+          "url": url,
+          "face_enhance": enhanceFace.toString()
+        });
+    info("Response: ${r.body}");
+    await Future.delayed(const Duration(milliseconds: 2000));
+    return jsonDecode(r.body)["output"].replaceAll("\\", "/");
   }
 
   Future<List<String>> _text2ImageCommunity({
@@ -226,11 +283,10 @@ class DiffusionService extends ArsCognitioService {
         return [];
       });
 
-  Future<List<String>> image2Image({
+  Future<GeneratedImage> image2Image({
     required DiffusionModel model,
     String? prompt,
     String? negativePrompt,
-    int samples = 1,
     double promptStrength = 0.5,
     int width = 512,
     required String init,
@@ -241,36 +297,50 @@ class DiffusionService extends ArsCognitioService {
     bool enhancePrompt = true,
     bool safetyChecker = true,
   }) =>
-      model.id == defaultModel.id
-          ? _image2ImageStableDiffusion(
-              prompt: prompt,
-              negativePrompt: negativePrompt,
-              samples: samples,
-              promptStrength: promptStrength,
-              init: init,
-              width: width,
-              height: height,
-              inferenceSteps: inferenceSteps,
-              guidanceScale: guidanceScale,
-              seed: seed,
-              enhancePrompt: enhancePrompt,
-              safetyChecker: safetyChecker,
-            )
-          : _image2ImageCommunity(
-              prompt: prompt,
-              model: model.id,
-              negativePrompt: negativePrompt,
-              samples: samples,
-              init: init,
-              promptStrength: promptStrength,
-              width: width,
-              height: height,
-              inferenceSteps: inferenceSteps,
-              guidanceScale: guidanceScale,
-              seed: seed,
-              enhancePrompt: enhancePrompt,
-              safetyChecker: safetyChecker,
-            );
+      (model.id == defaultModel.id
+              ? _image2ImageStableDiffusion(
+                  prompt: prompt,
+                  negativePrompt: negativePrompt,
+                  samples: 1,
+                  promptStrength: promptStrength,
+                  init: init,
+                  width: width,
+                  height: height,
+                  inferenceSteps: inferenceSteps,
+                  guidanceScale: guidanceScale,
+                  seed: seed,
+                  enhancePrompt: enhancePrompt,
+                  safetyChecker: safetyChecker,
+                )
+              : _image2ImageCommunity(
+                  prompt: prompt,
+                  model: model.id,
+                  negativePrompt: negativePrompt,
+                  samples: 1,
+                  init: init,
+                  promptStrength: promptStrength,
+                  width: width,
+                  height: height,
+                  inferenceSteps: inferenceSteps,
+                  guidanceScale: guidanceScale,
+                  seed: seed,
+                  enhancePrompt: enhancePrompt,
+                  safetyChecker: safetyChecker,
+                ))
+          .then((value) => GeneratedImage()
+            ..image = value[0]
+            ..inferenceSteps = inferenceSteps
+            ..promptStrength = promptStrength
+            ..prompt = prompt
+            ..width = width
+            ..height = height
+            ..enhancePrompt = enhancePrompt
+            ..safetyChecker = safetyChecker
+            ..guidanceScale = guidanceScale
+            ..negativePrompt = negativePrompt
+            ..model = model.id
+            ..seed = seed
+            ..promptImage = init);
 
   Future<List<String>> _image2ImageStableDiffusion({
     String? prompt,
@@ -391,6 +461,11 @@ class DiffusionService extends ArsCognitioService {
           .toList())
       .then((value) {
         value.insert(0, defaultModel);
+
+        for (DiffusionModel i in value) {
+          info("${i.id}(${i.name}): ${i.description}");
+        }
+
         return value;
       });
 

@@ -1,5 +1,6 @@
 import 'package:ars_cognitio/model/settings.dart';
 import 'package:ars_cognitio/sugar.dart';
+import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,6 +25,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               leading: const Icon(Icons.chat_bubble_rounded),
               title: const Text("Chat Settings"),
               onTap: () => Get.to(() => const SettingsChat()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_rounded),
+              title: const Text("Quick Wipe"),
+              onTap: () => dialogConfirm(
+                  context: context,
+                  title: "Quick Wipe?",
+                  description:
+                      "This will retain generated images on the server.",
+                  confirmButtonText: "Wipe",
+                  onConfirm: (context) {
+                    saveData((d) => d.getGenerated().clear());
+                  }),
             )
           ],
         ),

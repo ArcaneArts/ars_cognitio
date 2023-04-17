@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:ars_cognitio/model/diffusion_model.dart';
+import 'package:ars_cognitio/model/generated_image.dart';
 import 'package:ars_cognitio/services/diffusion_service.dart';
 import 'package:ars_cognitio/sugar.dart';
 import 'package:ars_cognitio/ui/diffusion_settings.dart';
 import 'package:ars_cognitio/ui/image.dart';
+import 'package:ars_cognitio/ui/prompt_details.dart';
+import 'package:blur/blur.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -74,7 +77,12 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                       dropdownMenuEntries: [
                         ...snap.data!.map((e) => DropdownMenuEntry(
                             trailingIcon: IconButton(
-                              icon: Icon(Icons.info_rounded),
+                              color: thoseModels.contains(e.id)
+                                  ? Colors.red
+                                  : null,
+                              icon: Icon(thoseModels.contains(e.id)
+                                  ? Icons.warning_rounded
+                                  : Icons.info_rounded),
                               onPressed: () {},
                               tooltip: e.description ?? "No description",
                             ),
@@ -117,13 +125,11 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                           negativePrompt: negativePrompt.text)
                       .then((value) {
                     saveData((d) {
-                      for (var i in value.reversed) {
-                        d.getGenerated().insert(0, i);
-                      }
+                      d.getGenerated().insert(0, value);
                     });
 
                     setState(() {
-                      if (value.isEmpty) {
+                      if ((value.image ?? "").isEmpty) {
                         snack(
                             "Failed to receive any images from the server. Please try again later.");
                       }
@@ -152,13 +158,11 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                           negativePrompt: negativePrompt.text)
                       .then((value) {
                     saveData((d) {
-                      for (var i in value.reversed) {
-                        d.getGenerated().insert(0, i);
-                      }
+                      d.getGenerated().insert(0, value);
                     });
 
                     setState(() {
-                      if (value.isEmpty) {
+                      if ((value.image ?? "").isEmpty) {
                         snack(
                             "Failed to receive any images from the server. Please try again later.");
                       }
@@ -266,28 +270,64 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                                     ]),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(24),
-                                  onLongPress: () => dialogConfirm(
-                                      context: context,
-                                      title: "Delete?",
-                                      description: "Are you sure?",
-                                      confirmButtonText: "Delete",
-                                      onConfirm: (context) => setState(() {
-                                            saveData((d) {
-                                              d.getGenerated().removeAt(index);
-                                            });
-                                          })),
+                                  onLongPress: () => stableDiffusionService()
+                                      .deleteDialog(context,
+                                          data().getGenerated()[index].image!),
                                   onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ImageScreen(
                                                 image: data()
                                                     .getGenerated()[index],
-                                              ))),
+                                              ))).then((value) {
+                                    if (value is GeneratedImage) {
+                                      model = DiffusionModel()
+                                        ..id = value.model
+                                        ..name = value.model
+                                        ..description = "Loaded";
+                                      initImageUrl = value.promptImage;
+                                      prompt.value = TextEditingValue(
+                                          text: value.prompt ?? "");
+                                      negativePrompt.value = TextEditingValue(
+                                          text: value.negativePrompt ?? "");
+                                      setState(() {});
+                                    }
+                                  }),
                                   child: ClipRRect(
                                       borderRadius: BorderRadius.circular(24),
-                                      child: Image.network(
-                                        data().getGenerated()[index],
-                                        fit: BoxFit.cover,
+                                      child: Stack(
+                                        children: [
+                                          Image.network(
+                                            data()
+                                                .getGenerated()[index]
+                                                .bestImage(),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          Align(
+                                            alignment: Alignment.bottomCenter,
+                                            child: Blur(
+                                                borderRadius:
+                                                    const BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(24),
+                                                        topRight:
+                                                            Radius.circular(
+                                                                24)),
+                                                blur: 14,
+                                                blurColor: Colors.black,
+                                                overlay: PromptDetails(
+                                                  image: data()
+                                                      .getGenerated()[index],
+                                                ),
+                                                child: Opacity(
+                                                    opacity: 0,
+                                                    child: PromptDetails(
+                                                      image:
+                                                          data().getGenerated()[
+                                                              index],
+                                                    ))),
+                                          )
+                                        ],
                                       )),
                                 ),
                               ),
