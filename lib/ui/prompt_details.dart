@@ -38,19 +38,17 @@ class PromptDetails extends StatelessWidget {
                 ),
               PaddingRight(
                   padding: 14,
-                  child: Flexible(
-                      child: Text(
+                  child: Text(
                     image.prompt ?? "",
                     style: const TextStyle(fontSize: 24),
                     textAlign: TextAlign.center,
-                  ))),
+                  )),
               if ((image.negativePrompt ?? "").isNotEmpty)
-                Flexible(
-                    child: Text(
+                Text(
                   image.negativePrompt ?? "",
                   style: const TextStyle(fontSize: 24, color: Colors.red),
                   textAlign: TextAlign.center,
-                ))
+                )
             ],
           ),
         ),
