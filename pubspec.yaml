@@ -43,7 +43,7 @@ dependencies:
   blur: ^3.1.0
   shimmer: ^2.0.0
   flutter_chat_types: ^3.6.0
-  flutter_gpt_tokenizer: ^0.1.0
+  tiktoken: ^1.0.3
   intl: ^0.17.0
 dev_dependencies:
   flutter_test:

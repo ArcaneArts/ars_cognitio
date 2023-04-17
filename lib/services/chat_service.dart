@@ -9,7 +9,7 @@ import 'package:dart_openai/openai.dart';
 import 'package:fast_log/fast_log.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_gpt_tokenizer/flutter_gpt_tokenizer.dart';
+import 'package:tiktoken/tiktoken.dart';
 
 Map<String, double> completionCost = {
   "gpt-3.5-turbo": 0.002,
@@ -44,10 +44,7 @@ class ChatService extends ArsCognitioStatelessService {
       });
 
   Future<int> count(String model, String text) async {
-    Tokenizer tk = Tokenizer();
-    int v = await tk.count(text, modelName: model);
-    tk.dispose();
-    return v;
+    return encodingForModel(model).encode(text).length;
   }
 
   Stream<String?>? addMessage(Chat chat, ChatMessage message) {
