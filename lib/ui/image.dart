@@ -60,6 +60,31 @@ class _ImageScreenState extends State<ImageScreen> {
                     d.getSettings().inferenceSteps =
                         widget.image.inferenceSteps;
                   });
+                  Future.delayed(
+                      const Duration(milliseconds: 250),
+                      () => Navigator.pop(
+                          context,
+                          GeneratedImage()
+                            ..image = widget.image.image
+                            ..prompt = widget.image.prompt
+                            ..model = widget.image.model
+                            ..negativePrompt = widget.image.negativePrompt
+                            ..promptImage = widget.image.image));
+                },
+                icon: const Icon(Icons.edit_rounded)),
+            IconButton(
+                onPressed: () {
+                  saveData((d) {
+                    d.getSettings().promptStrength =
+                        widget.image.promptStrength;
+                    d.getSettings().guidanceScale = widget.image.guidanceScale;
+                    d.getSettings().safetyChecker = widget.image.safetyChecker;
+                    d.getSettings().enhancePrompt = widget.image.enhancePrompt;
+                    d.getSettings().width = widget.image.width;
+                    d.getSettings().height = widget.image.height;
+                    d.getSettings().inferenceSteps =
+                        widget.image.inferenceSteps;
+                  });
                   Future.delayed(const Duration(milliseconds: 250),
                       () => Navigator.pop(context, widget.image));
                 },

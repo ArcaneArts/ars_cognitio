@@ -32,7 +32,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
 
   @override
   void initState() {
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 60), (_) {
       setState(() {
         stableDiffusionService().systemLoad();
       });

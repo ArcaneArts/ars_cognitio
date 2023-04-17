@@ -121,7 +121,10 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text(widget.conversation.title ?? "Untitled"),
+          title: ListTile(
+            title: Text(widget.conversation.title ?? "Untitled"),
+            subtitle: Text(chatService().tkSummary()),
+          ),
         ),
         body: chat.Chat(
           messages: [

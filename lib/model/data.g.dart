@@ -15,10 +15,18 @@ Data _$DataFromJson(Map<String, dynamic> json) => Data()
       : Settings.fromJson(json['settings'] as Map<String, dynamic>)
   ..generatedImages = (json['generatedImages'] as List<dynamic>?)
       ?.map((e) => GeneratedImage.fromJson(e as Map<String, dynamic>))
-      .toList();
+      .toList()
+  ..promptTokens = (json['promptTokens'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as int),
+  )
+  ..completionTokens = (json['completionTokens'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as int),
+  );
 
 Map<String, dynamic> _$DataToJson(Data instance) => <String, dynamic>{
       'chats': instance.chats,
       'settings': instance.settings,
       'generatedImages': instance.generatedImages,
+      'promptTokens': instance.promptTokens,
+      'completionTokens': instance.completionTokens,
     };

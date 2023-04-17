@@ -1,4 +1,5 @@
 PODS:
+  - flutter_gpt_tokenizer (0.1.0)
   - FlutterMacOS (1.0.0)
   - macos_ui (0.1.0):
     - FlutterMacOS
@@ -9,12 +10,15 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - flutter_gpt_tokenizer (from `Flutter/ephemeral/.symlinks/plugins/flutter_gpt_tokenizer/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - macos_ui (from `Flutter/ephemeral/.symlinks/plugins/macos_ui/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 EXTERNAL SOURCES:
+  flutter_gpt_tokenizer:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_gpt_tokenizer/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   macos_ui:
@@ -25,6 +29,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
+  flutter_gpt_tokenizer: 0b19cc0e359a0d5903c2086ac28a71573f1a4eff
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   macos_ui: 6229a8922cd97bafb7d9636c8eb8dfb0744183ca
   path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9

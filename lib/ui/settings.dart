@@ -25,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               leading: const Icon(Icons.chat_bubble_rounded),
               title: const Text("Chat Settings"),
               onTap: () => Get.to(() => const SettingsChat()),
+              subtitle: Text(chatService().tkSummary()),
             ),
             ListTile(
               leading: const Icon(Icons.delete_rounded),
@@ -55,12 +56,12 @@ class _SettingsChatState extends State<SettingsChat> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text("Chat Settings"),
+          title: const Text("Chat Settings"),
         ),
         body: ListView(
           children: [
             ListTile(
-              title: Text("Chat Model"),
+              title: const Text("Chat Model"),
               subtitle: DropdownMenu<String>(
                 dropdownMenuEntries: [
                   ...availableChatModels.map((e) => DropdownMenuEntry(
@@ -75,7 +76,7 @@ class _SettingsChatState extends State<SettingsChat> {
               ),
             ),
             ListTile(
-              title: Text("Chat Temperature"),
+              title: const Text("Chat Temperature"),
               subtitle: Slider(
                   value: (data().getSettings().chatTemperature ?? 1).toDouble(),
                   label: (data().getSettings().chatTemperature ?? 1).toString(),
@@ -89,7 +90,7 @@ class _SettingsChatState extends State<SettingsChat> {
                       })),
             ),
             ListTile(
-              title: Text("Chat Presence Penalty"),
+              title: const Text("Chat Presence Penalty"),
               subtitle: Slider(
                   value: (data().getSettings().presencePenalty ?? 0).toDouble(),
                   label: (data().getSettings().presencePenalty ?? 0).toString(),
@@ -103,7 +104,7 @@ class _SettingsChatState extends State<SettingsChat> {
                       })),
             ),
             ListTile(
-              title: Text("Chat Frequency Penalty"),
+              title: const Text("Chat Frequency Penalty"),
               subtitle: Slider(
                   value:
                       (data().getSettings().frequencyPenalty ?? 0).toDouble(),
@@ -134,7 +135,7 @@ class _SettingsAPIKeysState extends State<SettingsAPIKeys> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text("API Keys"),
+          title: const Text("API Keys"),
         ),
         body: ListView(
           children: [

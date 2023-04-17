@@ -8,6 +8,19 @@ import 'package:ars_cognitio/sugar.dart';
 import 'package:dart_openai/openai.dart';
 import 'package:fast_log/fast_log.dart';
 import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_gpt_tokenizer/flutter_gpt_tokenizer.dart';
+
+Map<String, double> completionCost = {
+  "gpt-3.5-turbo": 0.002,
+  "gpt-4": 0.06,
+  "gpt-4-32k": 0.12
+};
+Map<String, double> promptCost = {
+  "gpt-3.5-turbo": 0.002,
+  "gpt-4": 0.03,
+  "gpt-4-32k": 0.06
+};
 
 class ChatService extends ArsCognitioStatelessService {
   List<Chat> getChats() => data().getChats();
@@ -21,10 +34,21 @@ class ChatService extends ArsCognitioStatelessService {
         OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.user,
             content: "Summarize this chat into a title. Up to 5 words.")
-      ]).then((value) => value.choices.first.message.content
-          .replaceAll("\"", "")
-          .replaceAll("Title: ", "")
-          .replaceAll(".", ""));
+      ]).then((value) {
+        saveData((d) => d.track("gpt-3.5-turbo", value.usage));
+
+        return value.choices.first.message.content
+            .replaceAll("\"", "")
+            .replaceAll("Title: ", "")
+            .replaceAll(".", "");
+      });
+
+  Future<int> count(String model, String text) async {
+    Tokenizer tk = Tokenizer();
+    int v = await tk.count(text, modelName: model);
+    tk.dispose();
+    return v;
+  }
 
   Stream<String?>? addMessage(Chat chat, ChatMessage message) {
     chat.messages ??= [];
@@ -32,6 +56,12 @@ class ChatService extends ArsCognitioStatelessService {
 
     if (message.role == OpenAIChatMessageRole.user) {
       String buffer = "";
+      count(data().getSettings().chatModel ?? availableChatModels.first,
+              (chat.messages ?? []).map((e) => e.message ?? "").join(""))
+          .then((value) => saveData((d) => d.addTokens(
+              data().getSettings().chatModel ?? availableChatModels.first,
+              value,
+              0)));
       Stream<String?> s = openaiService().client().chat.createStream(
           model: data().getSettings().chatModel ?? availableChatModels.first,
           frequencyPenalty: data().getSettings().frequencyPenalty ?? 0,
@@ -47,10 +77,18 @@ class ChatService extends ArsCognitioStatelessService {
         error(es);
       }).map((event) {
         if (event.choices.first.finishReason != null) {
-          saveData((_) => chat.messages!.add(ChatMessage.create(
-              role: OpenAIChatMessageRole.assistant,
-              streaming: false,
-              message: buffer + (event.choices.first.delta.content ?? ""))));
+          saveData((d) {
+            chat.messages!.add(ChatMessage.create(
+                role: OpenAIChatMessageRole.assistant,
+                streaming: false,
+                message: buffer + (event.choices.first.delta.content ?? "")));
+            count(data().getSettings().chatModel ?? availableChatModels.first,
+                    buffer + (event.choices.first.delta.content ?? ""))
+                .then((value) => saveData((d) => d.addTokens(
+                    data().getSettings().chatModel ?? availableChatModels.first,
+                    0,
+                    value)));
+          });
           info(
               "Adding message: ${buffer + (event.choices.first.delta.content ?? "")}");
           summarizeChat(chat).then((value) {
@@ -77,4 +115,7 @@ class ChatService extends ArsCognitioStatelessService {
     saveData((_) => getChats().add(c));
     return c;
   }
+
+  String tkSummary() =>
+      "${NumberFormat("###,###", "en_US").format(data().getTotalTokens())} Tokens, \$${NumberFormat("###,###.##", "en_US").format(data().getTotalCost())}";
 }
