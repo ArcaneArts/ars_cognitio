@@ -16,6 +16,9 @@ class Settings {
   String? openAiKey;
   String? openAiOrganization;
   String? googleServiceAccountJson;
+  String? playhtUser;
+  String? playhtSecret;
+  String? playhtVoice = "Lottie";
   String? stableDiffusionApiKey;
   String? chatModel = availableChatModels.first;
   double? chatTemperature = 1.0;

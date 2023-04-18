@@ -1,4 +1,6 @@
+import 'package:ars_cognitio/model/playht_voice.dart';
 import 'package:ars_cognitio/model/settings.dart';
+import 'package:ars_cognitio/ui/play_stream.dart';
 import 'package:ars_cognitio/sugar.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: Text(chatService().tkSummary()),
             ),
             ListTile(
+              title: const Text("Play.ht Voice"),
+              subtitle: Text(data().getSettings().playhtVoice ?? "Unset"),
+              onTap: () => Get.to(() => const PlayhtVoicePicker()),
+            ),
+            ListTile(
               leading: const Icon(Icons.delete_rounded),
               title: const Text("Quick Wipe"),
               onTap: () => dialogConfirm(
@@ -41,6 +48,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }),
             )
           ],
+        ),
+      );
+}
+
+class PlayhtVoicePicker extends StatelessWidget {
+  const PlayhtVoicePicker({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: const Text("Playht Voice"),
+        ),
+        body: FutureBuilder<List<PlayhtVoice>>(
+          future: playhtService().getUHDVoices(),
+          builder: (context, snap) => snap.hasData
+              ? ListView.builder(
+                  itemCount: snap.data!.length,
+                  itemBuilder: (context, pos) => ListTile(
+                    leading: IgnorePointer(
+                      ignoring: true,
+                      child: Radio<String?>(
+                        value: snap.data![pos].value ?? "",
+                        groupValue: data().getSettings().playhtVoice,
+                        onChanged: (e) {},
+                      ),
+                    ),
+                    onTap: () {
+                      saveData((d) =>
+                          d.getSettings().playhtVoice = snap.data![pos].value);
+                      Navigator.pop(context);
+                    },
+                    trailing: PlayStreamer(
+                        playing: IconButton(
+                          icon: Icon(Icons.stop_rounded),
+                          onPressed: () => audioService().stopper(),
+                        ),
+                        notPlaying: IconButton(
+                          icon: Icon(Icons.play_arrow_rounded),
+                          onPressed: () => audioService()
+                              .playMedia(snap.data![pos].sample ?? ""),
+                        )),
+                    title: Text(snap.data![pos].name ?? "Unknown Name"),
+                  ),
+                )
+              : const Center(
+                  child: CircularProgressIndicator(),
+                ),
         ),
       );
 }
@@ -176,6 +230,30 @@ class _SettingsAPIKeysState extends State<SettingsAPIKeys> {
                   maxLength: 100,
                   onSubmitted: (e) => stableDiffusionService().setKey(e),
                   onChanged: (e) => stableDiffusionService().setKey(e),
+                )),
+            ListTile(
+                title: const Text("Play.ht User"),
+                subtitle: TextField(
+                  decoration: const InputDecoration(hintText: "<enter user>"),
+                  controller: TextEditingController(
+                    text: playhtService().user(),
+                  ),
+                  maxLines: 1,
+                  maxLength: 100,
+                  onSubmitted: (e) => playhtService().setUser(e),
+                  onChanged: (e) => playhtService().setUser(e),
+                )),
+            ListTile(
+                title: const Text("Play.ht Secret"),
+                subtitle: TextField(
+                  decoration: const InputDecoration(hintText: "<enter secret>"),
+                  controller: TextEditingController(
+                    text: playhtService().secret(),
+                  ),
+                  maxLines: 1,
+                  maxLength: 100,
+                  onSubmitted: (e) => playhtService().setSecret(e),
+                  onChanged: (e) => playhtService().setSecret(e),
                 )),
           ],
         ),

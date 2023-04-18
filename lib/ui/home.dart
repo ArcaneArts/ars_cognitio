@@ -1,3 +1,4 @@
+import 'package:ars_cognitio/sugar.dart';
 import 'package:ars_cognitio/ui/chat.dart';
 import 'package:ars_cognitio/ui/diffusion.dart';
 import 'package:ars_cognitio/ui/settings.dart';
@@ -12,6 +13,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int index = 1;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(

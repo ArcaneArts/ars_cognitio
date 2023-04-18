@@ -1,10 +1,12 @@
 import 'package:ars_cognitio/model/data.dart';
 import 'package:ars_cognitio/services/ai_service.dart';
+import 'package:ars_cognitio/services/audio_service.dart';
 import 'package:ars_cognitio/services/chat_service.dart';
 import 'package:ars_cognitio/services/data_service.dart';
 import 'package:ars_cognitio/services/diffusion_service.dart';
 import 'package:ars_cognitio/services/gcp_service.dart';
 import 'package:ars_cognitio/services/openai_service.dart';
+import 'package:ars_cognitio/services/playht_service.dart';
 import 'package:fast_log/fast_log.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -156,6 +158,10 @@ Future<LazyBox> hiveLazy(String box) => _lock.synchronized(() async {
         return value;
       });
     });
+
+AudioService audioService() => services().get();
+
+PlayhtService playhtService() => services().get();
 
 ChatService chatService() => services().get();
 

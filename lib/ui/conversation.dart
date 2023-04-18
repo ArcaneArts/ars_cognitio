@@ -184,6 +184,9 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                   inputTextColor:
                       Theme.of(context).textTheme.bodyMedium!.color!,
                   backgroundColor: Theme.of(context).colorScheme.background),
+          onMessageLongPress: (context, msg) {
+            playhtService().speak((msg as types.TextMessage).text);
+          },
           textMessageBuilder: (message,
               {required messageWidth, required showName}) {
             if (responseStream != null && message.author.id == "stream") {

@@ -10,6 +10,9 @@ Settings _$SettingsFromJson(Map<String, dynamic> json) => Settings()
   ..openAiKey = json['openAiKey'] as String?
   ..openAiOrganization = json['openAiOrganization'] as String?
   ..googleServiceAccountJson = json['googleServiceAccountJson'] as String?
+  ..playhtUser = json['playhtUser'] as String?
+  ..playhtSecret = json['playhtSecret'] as String?
+  ..playhtVoice = json['playhtVoice'] as String?
   ..stableDiffusionApiKey = json['stableDiffusionApiKey'] as String?
   ..chatModel = json['chatModel'] as String?
   ..chatTemperature = (json['chatTemperature'] as num?)?.toDouble()
@@ -27,6 +30,9 @@ Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
       'openAiKey': instance.openAiKey,
       'openAiOrganization': instance.openAiOrganization,
       'googleServiceAccountJson': instance.googleServiceAccountJson,
+      'playhtUser': instance.playhtUser,
+      'playhtSecret': instance.playhtSecret,
+      'playhtVoice': instance.playhtVoice,
       'stableDiffusionApiKey': instance.stableDiffusionApiKey,
       'chatModel': instance.chatModel,
       'chatTemperature': instance.chatTemperature,
