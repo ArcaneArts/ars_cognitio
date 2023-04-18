@@ -69,16 +69,17 @@ class PlayhtVoicePicker extends StatelessWidget {
                     leading: IgnorePointer(
                       ignoring: true,
                       child: Radio<String?>(
-                        value: snap.data![pos].value ?? "",
+                        value: snap.data![pos].id ?? "",
                         groupValue: data().getSettings().playhtVoice,
                         onChanged: (e) {},
                       ),
                     ),
                     onTap: () {
                       saveData((d) =>
-                          d.getSettings().playhtVoice = snap.data![pos].value);
+                          d.getSettings().playhtVoice = snap.data![pos].id);
                       Navigator.pop(context);
                     },
+                    subtitle: Text(snap.data![pos].id ?? ""),
                     trailing: PlayStreamer(
                         playing: IconButton(
                           icon: Icon(Icons.stop_rounded),

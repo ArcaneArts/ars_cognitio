@@ -6,7 +6,7 @@ part 'playht_voice.g.dart';
 class PlayhtVoice {
   String? name;
   String? gender;
-  String? value;
+  String? id;
   String? accent;
   String? age;
   String? tempo;
@@ -16,10 +16,6 @@ class PlayhtVoice {
   String? sample;
   String? texture;
   String? style;
-  bool? hq;
-  bool? isPopular;
-  bool? isNew;
-  bool? isExperimental;
 
   PlayhtVoice();
 

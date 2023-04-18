@@ -46,6 +46,7 @@ dependencies:
   flutter_chat_types: ^3.6.0
   tiktoken: ^1.0.3
   intl: ^0.17.0
+  base64_audio_source: ^1.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -9,7 +9,7 @@ part of 'playht_voice.dart';
 PlayhtVoice _$PlayhtVoiceFromJson(Map<String, dynamic> json) => PlayhtVoice()
   ..name = json['name'] as String?
   ..gender = json['gender'] as String?
-  ..value = json['value'] as String?
+  ..id = json['id'] as String?
   ..accent = json['accent'] as String?
   ..age = json['age'] as String?
   ..tempo = json['tempo'] as String?
@@ -18,17 +18,13 @@ PlayhtVoice _$PlayhtVoiceFromJson(Map<String, dynamic> json) => PlayhtVoice()
   ..languageCode = json['languageCode'] as String?
   ..sample = json['sample'] as String?
   ..texture = json['texture'] as String?
-  ..style = json['style'] as String?
-  ..hq = json['hq'] as bool?
-  ..isPopular = json['isPopular'] as bool?
-  ..isNew = json['isNew'] as bool?
-  ..isExperimental = json['isExperimental'] as bool?;
+  ..style = json['style'] as String?;
 
 Map<String, dynamic> _$PlayhtVoiceToJson(PlayhtVoice instance) =>
     <String, dynamic>{
       'name': instance.name,
       'gender': instance.gender,
-      'value': instance.value,
+      'id': instance.id,
       'accent': instance.accent,
       'age': instance.age,
       'tempo': instance.tempo,
@@ -38,8 +34,4 @@ Map<String, dynamic> _$PlayhtVoiceToJson(PlayhtVoice instance) =>
       'sample': instance.sample,
       'texture': instance.texture,
       'style': instance.style,
-      'hq': instance.hq,
-      'isPopular': instance.isPopular,
-      'isNew': instance.isNew,
-      'isExperimental': instance.isExperimental,
     };

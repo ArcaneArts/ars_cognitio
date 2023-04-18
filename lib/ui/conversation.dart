@@ -190,7 +190,7 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
               speaking = msg.id;
             });
             playhtService()
-                .speak((msg as types.TextMessage).text)
+                .speakV2((msg as types.TextMessage).text)
                 .then((value) => setState(() {
                       speaking = null;
                     }));
