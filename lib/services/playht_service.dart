@@ -34,9 +34,17 @@ class PlayhtService extends ArsCognitioService {
 
   Future<void> waitAndPlay(Map<String, dynamic> json) async {
     if (json["status"] == "SUCCESS" || json["audioUrl"] != null) {
-      await Future.delayed(const Duration(seconds: 3));
-      return audioService()
-          .playMedia((json["audioUrl"] as List<dynamic>)[0].toString());
+      while (true) {
+        await Future.delayed(const Duration(seconds: 1), () {});
+        try {
+          await audioService()
+              .playMedia((json["audioUrl"] as List<dynamic>)[0].toString());
+          success("Played!");
+          break;
+        } catch (e, es) {
+          warn(e);
+        }
+      }
     } else {
       await Future.delayed(const Duration(seconds: 1));
       String trs = json["transcriptionId"];
