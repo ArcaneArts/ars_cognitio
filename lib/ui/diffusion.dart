@@ -23,7 +23,6 @@ class DiffusionScreen extends StatefulWidget {
 
 class _DiffusionScreenState extends State<DiffusionScreen> {
   bool loading = false;
-  TextEditingController controller = TextEditingController();
   TextEditingController prompt = TextEditingController();
   TextEditingController negativePrompt = TextEditingController();
   DiffusionModel model = stableDiffusionService().defaultModel;
@@ -46,6 +45,21 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
     super.dispose();
   }
 
+  Iterable<DiffusionModel> sort(List<DiffusionModel> l) sync* {
+    List<DiffusionModel> f = [];
+    List<String> m = data().getFavoriteImageModels();
+
+    for (DiffusionModel i in l) {
+      if (!(m.contains(i.id ?? ""))) {
+        f.add(i);
+      } else {
+        yield i;
+      }
+    }
+
+    yield* f;
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -66,16 +80,44 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
               future: stableDiffusionService().listModels(),
               builder: (context, snap) => snap.hasData
                   ? DropdownMenu<DiffusionModel>(
+                      key: UniqueKey(),
                       initialSelection: snap.data!.first,
-                      controller: controller,
-                      menuStyle: MenuStyle(
+                      controller: TextEditingController(),
+                      menuStyle: const MenuStyle(
                         visualDensity: VisualDensity.compact,
                       ),
                       onSelected: (e) => model = e ?? model,
                       width: 200,
                       menuHeight: 500,
                       dropdownMenuEntries: [
-                        ...snap.data!.map((e) => DropdownMenuEntry(
+                        ...sort(snap.data!).map((e) => DropdownMenuEntry(
+                            leadingIcon: IconButton(
+                              icon: Icon(
+                                data()
+                                        .getFavoriteImageModels()
+                                        .contains(e.id ?? "")
+                                    ? Icons.star_rounded
+                                    : Icons.star_border_rounded,
+                                color: data()
+                                        .getFavoriteImageModels()
+                                        .contains(e.id ?? "")
+                                    ? Colors.yellow
+                                    : null,
+                              ),
+                              onPressed: () => setState(() {
+                                saveData((d) {
+                                  if (d
+                                      .getFavoriteImageModels()
+                                      .contains(e.id ?? "")) {
+                                    d
+                                        .getFavoriteImageModels()
+                                        .remove(e.id ?? "");
+                                  } else {
+                                    d.getFavoriteImageModels().add(e.id ?? "");
+                                  }
+                                });
+                              }),
+                            ),
                             trailingIcon: IconButton(
                               color: thoseModels.contains(e.id)
                                   ? Colors.red

@@ -1,5 +1,5 @@
 import 'package:ars_cognitio/sugar.dart';
-import 'package:ars_cognitio/ui/material_app.dart';
+import 'package:ars_cognitio/ui/conversation.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
 import 'package:padded/padded.dart';

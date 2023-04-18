@@ -23,6 +23,18 @@ class Data {
   List<GeneratedImage>? generatedImages;
   Map<String, int>? promptTokens;
   Map<String, int>? completionTokens;
+  List<String>? favoriteImageModels;
+  List<String>? systemTemplates;
+
+  List<String> getSystemTemplates() {
+    systemTemplates ??= [];
+    return systemTemplates!;
+  }
+
+  List<String> getFavoriteImageModels() {
+    favoriteImageModels ??= [];
+    return favoriteImageModels!;
+  }
 
   Map<String, int> getPromptTokens() {
     promptTokens ??= {};

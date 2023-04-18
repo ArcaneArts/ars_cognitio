@@ -21,7 +21,13 @@ Data _$DataFromJson(Map<String, dynamic> json) => Data()
   )
   ..completionTokens = (json['completionTokens'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as int),
-  );
+  )
+  ..favoriteImageModels = (json['favoriteImageModels'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList()
+  ..systemTemplates = (json['systemTemplates'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList();
 
 Map<String, dynamic> _$DataToJson(Data instance) => <String, dynamic>{
       'chats': instance.chats,
@@ -29,4 +35,6 @@ Map<String, dynamic> _$DataToJson(Data instance) => <String, dynamic>{
       'generatedImages': instance.generatedImages,
       'promptTokens': instance.promptTokens,
       'completionTokens': instance.completionTokens,
+      'favoriteImageModels': instance.favoriteImageModels,
+      'systemTemplates': instance.systemTemplates,
     };
