@@ -23,6 +23,7 @@ class ChatViewScreenMaterial extends StatefulWidget {
 
 class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
   Stream<String?>? responseStream;
+  String? speaking;
 
   void send(ChatMessage message) {
     setState(() {
@@ -132,7 +133,7 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                                   setState(() {});
                                 }),
                           ))),
-                  DropdownMenuEntry(
+                  const DropdownMenuEntry(
                     value: "NEW",
                     label: "New Template",
                     leadingIcon: Icon(Icons.add_rounded),
@@ -185,7 +186,14 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                       Theme.of(context).textTheme.bodyMedium!.color!,
                   backgroundColor: Theme.of(context).colorScheme.background),
           onMessageLongPress: (context, msg) {
-            playhtService().speak((msg as types.TextMessage).text);
+            setState(() {
+              speaking = msg.id;
+            });
+            playhtService()
+                .speak((msg as types.TextMessage).text)
+                .then((value) => setState(() {
+                      speaking = null;
+                    }));
           },
           textMessageBuilder: (message,
               {required messageWidth, required showName}) {
@@ -234,7 +242,28 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
 
             return Padding(
               padding: const EdgeInsets.all(14),
-              child: MarkdownText(content: message.text),
+              child: speaking != null && message.id == "$speaking"
+                  ? Shimmer(
+                      gradient: LinearGradient(colors: [
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        ColorTween(
+                                begin: Colors.purpleAccent,
+                                end: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .color!)
+                            .lerp(0.2)!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                        Theme.of(context).textTheme.bodyMedium!.color!,
+                      ]),
+                      period: Duration(seconds: 1),
+                      child: MarkdownText(content: message.text))
+                  : MarkdownText(content: message.text),
             );
           },
           onSendPressed: (message) {

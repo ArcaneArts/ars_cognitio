@@ -16,6 +16,19 @@ class PlayhtService extends ArsCognitioService {
   void setSecret(String secret) =>
       saveData((d) => d.getSettings().playhtSecret = secret);
 
+  Future<void> speakV2(String text) =>
+      http.post(Uri.parse("https://play.ht/api/v2/tts/stream"), headers: {
+        "Authorization": "Bearer ${secret()}",
+        "X-User-ID": user(),
+        "accept": "application/json"
+      }, body: {
+        "voice": data().getSettings().playhtVoice ?? "",
+        "text": text,
+      }).then((value) {
+        info("Got response?: ${value.body}");
+        return value;
+      }).then((value) => waitAndPlay(jsonDecode(value.body)));
+
   Future<void> speak(String text) => http
           .post(Uri.parse("https://play.ht/api/v1/convert"),
               headers: {
@@ -40,7 +53,7 @@ class PlayhtService extends ArsCognitioService {
           await audioService()
               .playMedia((json["audioUrl"] as List<dynamic>)[0].toString());
           success("Played!");
-          break;
+          return;
         } catch (e, es) {
           warn(e);
         }
