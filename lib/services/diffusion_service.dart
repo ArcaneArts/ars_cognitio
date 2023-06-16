@@ -461,6 +461,9 @@ class DiffusionService extends ArsCognitioService {
           .toList())
       .then((value) {
         value.insert(0, defaultModel);
+        for (DiffusionModel i in value) {
+          info("id: ${i.id} name: ${i.name}");
+        }
         return value;
       });
 
