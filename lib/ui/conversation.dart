@@ -2,7 +2,7 @@ import 'package:ars_cognitio/model/chat/chat.dart';
 import 'package:ars_cognitio/model/chat/chat_message.dart';
 import 'package:ars_cognitio/sugar.dart';
 import 'package:ars_cognitio/ui/md.dart';
-import 'package:dart_openai/openai.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +23,6 @@ class ChatViewScreenMaterial extends StatefulWidget {
 
 class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
   Stream<String?>? responseStream;
-  String? speaking;
 
   void send(ChatMessage message) {
     setState(() {
@@ -111,7 +110,7 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                       message: value, role: OpenAIChatMessageRole.system));
                 },
                 width: 150,
-                label: Text("System"),
+                label: const Text("System"),
                 dropdownMenuEntries: [
                   ...data()
                       .getSystemTemplates()
@@ -119,7 +118,7 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                           value: e,
                           label: e.length > 48 ? "${e.substring(0, 45)}..." : e,
                           trailingIcon: IconButton(
-                            icon: Icon(Icons.delete_rounded),
+                            icon: const Icon(Icons.delete_rounded),
                             onPressed: () => dialogConfirm(
                                 context: context,
                                 title: "Delete System Template?",
@@ -185,16 +184,6 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                   inputTextColor:
                       Theme.of(context).textTheme.bodyMedium!.color!,
                   backgroundColor: Theme.of(context).colorScheme.background),
-          onMessageLongPress: (context, msg) {
-            setState(() {
-              speaking = msg.id;
-            });
-            playhtService()
-                .speakV2((msg as types.TextMessage).text)
-                .then((value) => setState(() {
-                      speaking = null;
-                    }));
-          },
           textMessageBuilder: (message,
               {required messageWidth, required showName}) {
             if (responseStream != null && message.author.id == "stream") {
@@ -234,7 +223,7 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
                         Theme.of(context).textTheme.bodyMedium!.color!,
                         Theme.of(context).textTheme.bodyMedium!.color!,
                       ]),
-                      period: Duration(seconds: 3),
+                      period: const Duration(seconds: 3),
                       child: MarkdownText(content: snap.data ?? "...")),
                 ),
               );
@@ -242,28 +231,7 @@ class _ChatViewScreenMaterialState extends State<ChatViewScreenMaterial> {
 
             return Padding(
               padding: const EdgeInsets.all(14),
-              child: speaking != null && message.id == "$speaking"
-                  ? Shimmer(
-                      gradient: LinearGradient(colors: [
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                        ColorTween(
-                                begin: Colors.purpleAccent,
-                                end: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .color!)
-                            .lerp(0.2)!,
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                        Theme.of(context).textTheme.bodyMedium!.color!,
-                      ]),
-                      period: Duration(seconds: 1),
-                      child: MarkdownText(content: message.text))
-                  : MarkdownText(content: message.text),
+              child: MarkdownText(content: message.text),
             );
           },
           onSendPressed: (message) {

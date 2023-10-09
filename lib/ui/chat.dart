@@ -1,5 +1,6 @@
 import 'package:ars_cognitio/sugar.dart';
 import 'package:ars_cognitio/ui/conversation.dart';
+import 'package:ars_cognitio/ui/settings.dart';
 import 'package:dialoger/dialoger.dart';
 import 'package:flutter/material.dart';
 import 'package:padded/padded.dart';
@@ -17,16 +18,22 @@ class _ChatsScreenState extends State<ChatsScreen> {
         appBar: AppBar(
           title: const Text("Chat"),
           actions: [
+            IconButton(
+                icon: const Icon(Icons.add_rounded),
+                onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ChatViewScreenMaterial(
+                                conversation: chatService().newChat())))
+                    .then((value) => setState(() {}))),
             PaddingRight(
                 padding: 14,
                 child: IconButton(
-                    icon: const Icon(Icons.add_rounded),
                     onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ChatViewScreenMaterial(
-                                    conversation: chatService().newChat())))
-                        .then((value) => setState(() {}))))
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SettingsScreen())),
+                    icon: const Icon(Icons.settings_rounded))),
           ],
         ),
         body: ListView.builder(

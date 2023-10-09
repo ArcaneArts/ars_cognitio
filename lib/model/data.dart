@@ -8,10 +8,9 @@
  */
 
 import 'package:ars_cognitio/model/chat/chat.dart';
-import 'package:ars_cognitio/model/generated_image.dart';
 import 'package:ars_cognitio/model/settings.dart';
 import 'package:ars_cognitio/services/chat_service.dart';
-import 'package:dart_openai/openai.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'data.g.dart';
@@ -20,20 +19,13 @@ part 'data.g.dart';
 class Data {
   List<Chat>? chats;
   Settings? settings;
-  List<GeneratedImage>? generatedImages;
   Map<String, int>? promptTokens;
   Map<String, int>? completionTokens;
-  List<String>? favoriteImageModels;
   List<String>? systemTemplates;
 
   List<String> getSystemTemplates() {
     systemTemplates ??= [];
     return systemTemplates!;
-  }
-
-  List<String> getFavoriteImageModels() {
-    favoriteImageModels ??= [];
-    return favoriteImageModels!;
   }
 
   Map<String, int> getPromptTokens() {
@@ -96,11 +88,6 @@ class Data {
     getPromptTokens()[model] = (getPromptTokens()[model] ?? 0) + promptTokens;
     getCompletionTokens()[model] =
         (getCompletionTokens()[model] ?? 0) + completionTokens;
-  }
-
-  List<GeneratedImage> getGenerated() {
-    generatedImages ??= [];
-    return generatedImages!;
   }
 
   List<Chat> getChats() {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:dart_openai/openai.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'chat_message.g.dart';

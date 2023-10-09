@@ -1,13 +1,6 @@
-import 'package:ars_cognitio/model/chat/chat.dart';
-import 'package:ars_cognitio/model/chat/chat_message.dart';
-import 'package:ars_cognitio/sugar.dart';
-import 'package:ars_cognitio/ui/home.dart';
-import 'package:dart_openai/openai.dart';
+import 'package:ars_cognitio/ui/chat.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:tinycolor2/tinycolor2.dart';
 
 class ArsCognitioMaterialApp extends StatelessWidget {
   const ArsCognitioMaterialApp({Key? key}) : super(key: key);
@@ -29,6 +22,6 @@ class ArsCognitioMaterialApp extends StatelessWidget {
               enableFeedback: false,
               showUnselectedLabels: false),
         ),
-        home: const HomeScreen(),
+        home: const ChatsScreen(),
       );
 }

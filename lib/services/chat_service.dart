@@ -1,24 +1,27 @@
 import 'dart:convert';
 
-import 'package:ars_cognitio/main.dart';
 import 'package:ars_cognitio/model/chat/chat.dart';
 import 'package:ars_cognitio/model/chat/chat_message.dart';
 import 'package:ars_cognitio/model/settings.dart';
 import 'package:ars_cognitio/sugar.dart';
-import 'package:dart_openai/openai.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:fast_log/fast_log.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 import 'package:tiktoken/tiktoken.dart';
 
 Map<String, double> completionCost = {
-  "gpt-3.5-turbo": 0.002,
+  "gpt-3.5-turbo": 0.004,
+  "gpt-3.5-turbo-instruct": 0.002,
   "gpt-4": 0.06,
+  "gpt-4-0314": 0.06,
   "gpt-4-32k": 0.12
 };
 Map<String, double> promptCost = {
-  "gpt-3.5-turbo": 0.002,
+  "gpt-3.5-turbo": 0.003,
+  "gpt-3.5-turbo-instruct": 0.0015,
   "gpt-4": 0.03,
+  "gpt-4-0314": 0.03,
   "gpt-4-32k": 0.06
 };
 

@@ -40,4 +40,10 @@ class Settings {
   Map<String, dynamic> toJson() => _$SettingsToJson(this);
 }
 
-List<String> availableChatModels = ["gpt-3.5-turbo", "gpt-4", "gpt-4-32k"];
+List<String> availableChatModels = [
+  "gpt-3.5-turbo-instruct",
+  "gpt-3.5-turbo",
+  "gpt-4-0314",
+  "gpt-4",
+  "gpt-4-32k"
+];
